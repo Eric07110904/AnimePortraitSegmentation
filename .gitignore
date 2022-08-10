@@ -6,3 +6,5 @@
 /*CamVid*
 /*camvid*
 /__pycache__
+/aug_image 
+/aug_mask 
