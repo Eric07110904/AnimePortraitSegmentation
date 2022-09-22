@@ -48,13 +48,13 @@ class SegmentationDataset(Dataset):
         self.filenames = [p.split("\\")[1][:-4] for p in glob.glob(self.mask_dir + "*.png")]
         self.transforms = transform 
         self.class_map =  [
-            np.array([0, 0, 0]),
-            np.array([0, 0, 128]),
-            np.array([0, 128, 0]),
-            np.array([0, 128, 128]),
-            np.array([128, 0, 0]),
-            np.array([128, 0, 128]),
-            np.array([128, 128, 0])    
+            np.array([0, 0, 0]), # 0 background
+            np.array([0, 0, 128]), # 1 face
+            np.array([0, 128, 0]), # 2 hair
+            np.array([0, 128, 128]), # 3 cloth
+            np.array([128, 0, 0]), # 4 eye 
+            np.array([128, 0, 128]), # 5mouth
+            np.array([128, 128, 0])    # 6 skin
         ]
         self.s = s
     def __len__(self):
@@ -66,7 +66,8 @@ class SegmentationDataset(Dataset):
         if self.transforms is not None:  
             random.seed(self.s)
             aug = self.transforms(image=img, mask=mask)
-            img, mask = aug["image"], aug["mask"]
+            img, mask = aug["image"], aug["mask"] # mask 3 channel
+
         # save_augmented(img, mask, self.filenames[index], self.s)
         # showImageWithMask(img, mask)
         mask = torch.from_numpy(segmentationMap2Label(mask, self.class_map)).long()
@@ -94,6 +95,8 @@ if __name__ == "__main__":
         for i in range(len(d)):
             img, mask = d[i]
             print(img.shape, mask.shape)
+            plt.imshow(mask)
+            plt.show()
             break 
         break 
 

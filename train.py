@@ -16,12 +16,14 @@ import cv2
 if __name__ == "__main__":
     # CREATE MobileNetV2 model
     class_num = 7 
-    model = smp.Unet('timm-mobilenetv3_large_100', encoder_weights='imagenet', classes=class_num, activation=None, encoder_depth=5, decoder_channels=[256, 128, 64, 32, 16]).to("cuda")
+    model = smp.Unet('mit_b0', encoder_weights='imagenet', classes=class_num, activation=None, encoder_depth=5, decoder_channels=[256, 128, 64, 32, 16]).to("cuda")
+    #model = smp.Unet('timm-mobilenetv3_large_100', encoder_weights='imagenet', classes=class_num, activation=None, encoder_depth=5, decoder_channels=[128, 128, 64, 32, 16]).to("cuda")
     # summary(model, (3, 512, 512))
+    # exit()
     """
     # hyper parmas 
     """
-    batch_size = 5
+    batch_size = 8
     train_transform = A.Compose([A.Resize(512, 512, interpolation=cv2.INTER_NEAREST)])
 
     valid_transform = A.Compose([A.Resize(512, 512, interpolation=cv2.INTER_NEAREST)])
@@ -29,10 +31,11 @@ if __name__ == "__main__":
     valid_dataset = SegmentationDataset("./data/valid/", "./data/valid_label/", 0, valid_transform)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=True)
-    lr = 1e-3
+    lr = 1e-4
     epoch = 150
-    criterion = nn.CrossEntropyLoss()
-    early_stopping = EarlyStopping(patience=5, verbose=True, path="./weights/MobileNetV2-Anime-Unet.pt")
+    class_w = torch.FloatTensor([  1,   1,   1,   1,  1, 5,   1.5]).cuda() 
+    criterion = nn.CrossEntropyLoss(weight=class_w)
+    early_stopping = EarlyStopping(patience=5, verbose=True, path="./weights/mit_b0_test.pt")
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(optimizer, lr, epochs=epoch, steps_per_epoch=len(train_loader))
     min_loss = np.inf

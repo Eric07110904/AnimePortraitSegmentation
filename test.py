@@ -15,7 +15,8 @@ import albumentations as A
 if __name__ == "__main__":
     # CREATE MobileNetV2 model
     class_num = 7
-    model = smp.Unet('timm-mobilenetv3_large_100', encoder_weights='imagenet', classes=class_num, activation=None, encoder_depth=5, decoder_channels=[256, 128, 64, 32, 16]).to("cuda")
+    model = smp.Unet('mit_b0', encoder_weights='imagenet', classes=class_num, activation=None, encoder_depth=5, decoder_channels=[256, 128, 64, 32, 16]).to("cuda")
+    #model = smp.Unet('timm-mobilenetv3_large_100', encoder_weights='imagenet', classes=class_num, activation=None, encoder_depth=5, decoder_channels=[128, 128, 64, 32, 16]).to("cuda")
     # summary(model, (3, 512, 512))
     """
     # hyper parmas 
@@ -23,8 +24,9 @@ if __name__ == "__main__":
     valid_transform = A.Compose([A.Resize(512, 512, interpolation=cv2.INTER_NEAREST)])
     batch_size = 1
     test_dataset = SegmentationDataset("./data/valid/", "./data/valid_label/", 0, valid_transform)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-    model.load_state_dict(torch.load("./weights/MobileNetV2-Anime-Unet.pt"))
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    model.load_state_dict(torch.load("./weights/mit_b0_test.pt"))
+    #model.load_state_dict(torch.load("./weights/timm-mobilenetv3_large_100-Anime-Unet.pt"))
     model.eval()
     for index, (img, mask) in enumerate(test_loader):
         img = img.to("cuda")
@@ -37,5 +39,6 @@ if __name__ == "__main__":
         fig, (ax1, ax2) = plt.subplots(1, 2)
         ax1.imshow(mask)
         ax2.imshow(out)
-        plt.show()
+        #plt.show()
+        plt.savefig("./result_mit2/"+str(index)+".png")
         
